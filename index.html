@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lingua — Live Translator</title>
+<title>Understand the Vibe</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -121,7 +121,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="logo">lingua<span>.live</span></div>
+    <div class="logo">understand<span> the vibe</span></div>
     <div class="status-pill" id="statusPill"><div class="status-dot"></div><span id="statusText">ready</span></div>
   </header>
 
@@ -244,7 +244,7 @@
 const SRC_CODES = {'en-US':'en','es-ES':'es','fr-FR':'fr','de-DE':'de','it-IT':'it','pt-BR':'pt','ru-RU':'ru','ja-JP':'ja','ko-KR':'ko','zh-CN':'zh','ar-SA':'ar','hi-IN':'hi','tr-TR':'tr','nl-NL':'nl','pl-PL':'pl','vi-VN':'vi','th-TH':'th'};
 const TTS_CODES = {'en':'en-US','es':'es-ES','fr':'fr-FR','de':'de-DE','it':'it-IT','pt':'pt-BR','ru':'ru-RU','ja':'ja-JP','ko':'ko-KR','zh':'zh-CN','ar':'ar-SA','hi':'hi-IN','tr':'tr-TR','nl':'nl-NL','pl':'pl-PL','vi':'vi-VN','th':'th-TH'};
 
-let recognition=null, isListening=false, currentTranslation='', translateTimeout=null, lastTranslated='', autoSpeak=true;
+let recognition=null, isListening=false, currentTranslation='', translateTimeout=null, lastTranslated='', autoSpeak=true, finalText='';
 let currentMode = 'manual'; // 'manual' or 'earpiece'
 let isSpeaking = false;
 
@@ -323,9 +323,14 @@ async function translate(text) {
 
     if (result && data.responseStatus === 200) {
       currentTranslation = result;
-      lastTranslated = text;
+      lastTranslated = '';  // reset so next speech triggers fresh translation
       translatedText.textContent = result;
       translatedText.classList.remove('empty');
+
+      // Clear heard panel and reset for next sentence
+      finalText = '';
+      heardText.textContent = 'Listening for next sentence…';
+      heardText.classList.add('empty');
 
       // Auto-speak in earpiece mode
       if (currentMode === 'earpiece') {
@@ -355,7 +360,7 @@ function startListening() {
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.lang = sourceLang.value;
-  let finalText = '';
+  finalText = ''; // reset on each startListening call
 
   recognition.onstart = () => {
     isListening=true; micBtn.classList.add('on'); micLabel.textContent='Listening…';
