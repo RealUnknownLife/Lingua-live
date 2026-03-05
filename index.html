@@ -9,74 +9,131 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #0a0a0f; --card: #16161f; --border: #ffffff0f;
-    --accent: #7fffd4; --accent2: #a78bfa; --text: #f0f0f5;
-    --muted: #6b6b80; --listening: #ff6b6b;
+    --accent: #7fffd4; --text: #f0f0f5; --muted: #6b6b80; --listening: #ff6b6b;
   }
   body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
   body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 60% 40% at 20% 10%, #7fffd41a 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 80% 90%, #a78bfa14 0%, transparent 60%); pointer-events: none; z-index: 0; }
-  .app { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100dvh; padding: 24px; gap: 16px; max-width: 720px; margin: 0 auto; width: 100%; }
-  header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .app { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100dvh; padding: 20px; gap: 14px; max-width: 720px; margin: 0 auto; width: 100%; }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
   .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--accent); }
   .logo span { color: var(--text); opacity: 0.4; font-weight: 400; }
-  .status-pill { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); background: var(--card); border: 1px solid var(--border); padding: 6px 12px; border-radius: 100px; transition: all 0.3s ease; }
+  .status-pill { display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); background: var(--card); border: 1px solid var(--border); padding: 6px 12px; border-radius: 100px; transition: all 0.3s; }
   .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); transition: all 0.3s; }
-  .status-pill.listening .status-dot { background: var(--listening); box-shadow: 0 0 8px var(--listening); animation: pulse-dot 1.5s ease-in-out infinite; }
-  .status-pill.translating .status-dot { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse-dot 0.8s ease-in-out infinite; }
   .status-pill.listening { color: var(--listening); border-color: #ff6b6b30; }
+  .status-pill.listening .status-dot { background: var(--listening); box-shadow: 0 0 8px var(--listening); animation: pdot 1.5s ease-in-out infinite; }
   .status-pill.translating { color: var(--accent); border-color: #7fffd430; }
-  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+  .status-pill.translating .status-dot { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pdot 0.8s ease-in-out infinite; }
+  .status-pill.speaking { color: #a78bfa; border-color: #a78bfa30; }
+  .status-pill.speaking .status-dot { background: #a78bfa; box-shadow: 0 0 8px #a78bfa; animation: pdot 0.6s ease-in-out infinite; }
+  @keyframes pdot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+
+  /* EARPIECE MODE TOGGLE */
+  .mode-row {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .mode-btn {
+    flex: 1; padding: 10px 8px; border-radius: 10px; border: none;
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; color: var(--muted); background: transparent;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .mode-btn.active { background: var(--accent); color: var(--bg); }
+  .mode-btn.active.earpiece { background: #a78bfa; color: #fff; }
+
+  /* Volume ring animation when speaking */
+  .speaking-ring {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0 10px;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .speaking-ring.show { display: flex; }
+  .ring-wrap { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+  .ring {
+    position: absolute; border-radius: 50%;
+    border: 2px solid #a78bfa;
+    animation: ring-expand 1.8s ease-out infinite;
+    opacity: 0;
+  }
+  .ring:nth-child(1) { width: 40px; height: 40px; animation-delay: 0s; }
+  .ring:nth-child(2) { width: 60px; height: 60px; animation-delay: 0.5s; }
+  .ring:nth-child(3) { width: 80px; height: 80px; animation-delay: 1s; }
+  @keyframes ring-expand { 0%{opacity:0.8;transform:scale(0.5)} 100%{opacity:0;transform:scale(1)} }
+  .ring-icon { font-size: 28px; z-index: 1; }
+  .speaking-label { font-family: 'DM Mono', monospace; font-size: 11px; color: #a78bfa; letter-spacing: 1px; text-transform: uppercase; }
+
   .lang-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
   .lang-select-wrap { display: flex; flex-direction: column; gap: 6px; }
   .lang-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-  select { width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%236b6b80' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  select { width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%236b6b80' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
   select:focus { border-color: var(--accent); }
-  .swap-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; margin-top: 20px; flex-shrink: 0; }
+  .swap-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s; margin-top: 20px; flex-shrink: 0; }
   .swap-btn:hover { color: var(--accent); border-color: var(--accent); transform: rotate(180deg); }
+
   .panels { display: grid; grid-template-rows: 1fr 1fr; gap: 12px; flex: 1; min-height: 0; }
-  .panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; transition: border-color 0.3s; }
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; transition: border-color 0.3s; }
   .panel.active { border-color: #ff6b6b40; }
   .panel.translated { border-color: #7fffd430; }
+  .panel.speaking-now { border-color: #a78bfa50; }
   .panel-header { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
   .panel-tag { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); }
   .panel.active .panel-tag { color: var(--listening); }
   .panel.translated .panel-tag { color: var(--accent); }
+  .panel.speaking-now .panel-tag { color: #a78bfa; }
   .copy-btn { background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px; border-radius: 6px; transition: color 0.2s; display: flex; align-items: center; }
   .copy-btn:hover { color: var(--text); }
-  .panel-text { flex: 1; overflow-y: auto; font-size: 18px; font-weight: 500; line-height: 1.6; color: var(--text); scrollbar-width: none; }
+  .panel-text { flex: 1; overflow-y: auto; font-size: 17px; font-weight: 500; line-height: 1.6; color: var(--text); scrollbar-width: none; }
   .panel-text::-webkit-scrollbar { display: none; }
-  .panel-text.empty { display: flex; align-items: center; color: var(--muted); font-size: 15px; font-weight: 400; font-style: italic; }
+  .panel-text.empty { display: flex; align-items: center; color: var(--muted); font-size: 14px; font-weight: 400; font-style: italic; }
   .interim { color: var(--muted); font-style: italic; }
   .visualizer { display: flex; align-items: center; gap: 3px; height: 24px; }
   .bar { width: 3px; height: 4px; background: var(--muted); border-radius: 2px; }
   .visualizer.active .bar { background: var(--listening); animation: wave 1s ease-in-out infinite; }
   .bar:nth-child(1){animation-delay:0s}.bar:nth-child(2){animation-delay:.1s}.bar:nth-child(3){animation-delay:.2s}.bar:nth-child(4){animation-delay:.3s}.bar:nth-child(5){animation-delay:.4s}.bar:nth-child(6){animation-delay:.3s}.bar:nth-child(7){animation-delay:.2s}.bar:nth-child(8){animation-delay:.1s}
   @keyframes wave { 0%,100%{height:4px} 50%{height:18px} }
+
+  .spinner { width: 14px; height: 14px; border: 2px solid transparent; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .translating-indicator { display: flex; align-items: center; gap: 8px; }
+
   .controls { display: flex; gap: 10px; align-items: center; }
   .mic-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 24px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
   .mic-btn.on { background: linear-gradient(135deg,#ff6b6b20,#ff6b6b10); border-color: #ff6b6b60; color: var(--listening); }
-  .mic-btn:hover { transform: translateY(-1px); }
   .action-btn { padding: 16px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
   .action-btn:hover { color: var(--text); }
-  .action-btn.speak { border-color: #7fffd430; background: linear-gradient(135deg,#7fffd415,#7fffd408); color: var(--accent); opacity: 0.4; pointer-events: none; }
-  .action-btn.speak.ready { opacity: 1; pointer-events: all; }
-  .spinner { width: 16px; height: 16px; border: 2px solid transparent; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
-  @keyframes spin { to{transform:rotate(360deg)} }
-  .translating-indicator { display: flex; align-items: center; gap: 8px; }
-  .error-msg { font-family: 'DM Mono', monospace; font-size: 11px; color: #ff6b6b; text-align: center; padding: 8px; display: none; }
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--accent); color: var(--bg); padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 700; opacity: 0; transition: all 0.3s ease; pointer-events: none; z-index: 100; }
+
+  .error-msg { font-family: 'DM Mono', monospace; font-size: 11px; color: #ff6b6b; text-align: center; padding: 6px; display: none; }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--accent); color: var(--bg); padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 700; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 100; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .free-badge { font-family: 'DM Mono', monospace; font-size: 9px; background: #7fffd415; border: 1px solid #7fffd430; color: var(--accent); padding: 3px 8px; border-radius: 100px; letter-spacing: 0.5px; }
+
+  .tip { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-align: center; padding: 4px 0; }
+  .tip span { color: var(--accent); }
 </style>
 </head>
 <body>
 <div class="app">
   <header>
     <div class="logo">lingua<span>.live</span></div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <div class="free-badge">✦ FREE</div>
-      <div class="status-pill" id="statusPill"><div class="status-dot"></div><span id="statusText">ready</span></div>
-    </div>
+    <div class="status-pill" id="statusPill"><div class="status-dot"></div><span id="statusText">ready</span></div>
   </header>
+
+  <!-- Mode selector -->
+  <div class="mode-row">
+    <button class="mode-btn active" id="modeManual" onclick="setMode('manual')">
+      👁 Read on screen
+    </button>
+    <button class="mode-btn earpiece" id="modeEar" onclick="setMode('earpiece')">
+      🎧 Earpiece / Speaker
+    </button>
+  </div>
 
   <div class="lang-row">
     <div class="lang-select-wrap">
@@ -128,7 +185,16 @@
     </div>
   </div>
 
-  <div class="panels">
+  <!-- Speaking ring (earpiece mode) -->
+  <div class="speaking-ring" id="speakingRing">
+    <div class="ring-wrap">
+      <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+      <div class="ring-icon">🎧</div>
+    </div>
+    <div class="speaking-label" id="speakingLabel">Waiting for speech…</div>
+  </div>
+
+  <div class="panels" id="panelsWrap">
     <div class="panel" id="heardPanel">
       <div class="panel-header">
         <div class="panel-tag">🎙 Heard</div>
@@ -145,7 +211,7 @@
     </div>
     <div class="panel" id="translatedPanel">
       <div class="panel-header">
-        <div class="panel-tag">✦ Translation</div>
+        <div class="panel-tag" id="translatedTag">✦ Translation</div>
         <div class="translating-indicator">
           <div class="spinner" id="spinner"></div>
           <button class="copy-btn" id="copyTrans"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
@@ -155,6 +221,8 @@
     </div>
   </div>
 
+  <div class="tip" id="modeTip"><span>Screen mode:</span> tap 🔊 to read translation aloud</div>
+
   <div class="error-msg" id="errorMsg"></div>
 
   <div class="controls">
@@ -162,22 +230,23 @@
       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 0 1 6 0v8.25a3 3 0 0 1-3 3Z"/></svg>
       <span id="micLabel">Start Listening</span>
     </button>
-    <button class="action-btn speak" id="speakBtn">
+    <button class="action-btn" id="speakBtn" title="Read aloud">
       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"/></svg>
     </button>
-    <button class="action-btn" id="clearBtn">
+    <button class="action-btn" id="clearBtn" title="Clear">
       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
     </button>
   </div>
 </div>
-<div class="toast" id="toast">Copied!</div>
+<div class="toast" id="toast"></div>
 
 <script>
-// Lang code maps
 const SRC_CODES = {'en-US':'en','es-ES':'es','fr-FR':'fr','de-DE':'de','it-IT':'it','pt-BR':'pt','ru-RU':'ru','ja-JP':'ja','ko-KR':'ko','zh-CN':'zh','ar-SA':'ar','hi-IN':'hi','tr-TR':'tr','nl-NL':'nl','pl-PL':'pl','vi-VN':'vi','th-TH':'th'};
 const TTS_CODES = {'en':'en-US','es':'es-ES','fr':'fr-FR','de':'de-DE','it':'it-IT','pt':'pt-BR','ru':'ru-RU','ja':'ja-JP','ko':'ko-KR','zh':'zh-CN','ar':'ar-SA','hi':'hi-IN','tr':'tr-TR','nl':'nl-NL','pl':'pl-PL','vi':'vi-VN','th':'th-TH'};
 
-let recognition=null, isListening=false, currentTranslation='', translateTimeout=null, lastTranslated='';
+let recognition=null, isListening=false, currentTranslation='', translateTimeout=null, lastTranslated='', autoSpeak=true;
+let currentMode = 'manual'; // 'manual' or 'earpiece'
+let isSpeaking = false;
 
 const $=id=>document.getElementById(id);
 const micBtn=$('micBtn'), micLabel=$('micLabel'), heardText=$('heardText'), translatedText=$('translatedText');
@@ -185,10 +254,56 @@ const statusPill=$('statusPill'), statusText=$('statusText'), visualizer=$('visu
 const heardPanel=$('heardPanel'), translatedPanel=$('translatedPanel'), spinner=$('spinner');
 const speakBtn=$('speakBtn'), clearBtn=$('clearBtn'), copyOrig=$('copyOrig'), copyTrans=$('copyTrans');
 const errorMsg=$('errorMsg'), toast=$('toast'), swapBtn=$('swapBtn'), sourceLang=$('sourceLang'), targetLang=$('targetLang');
+const speakingRing=$('speakingRing'), speakingLabel=$('speakingLabel'), panelsWrap=$('panelsWrap'), modeTip=$('modeTip');
+
+function setMode(mode) {
+  currentMode = mode;
+  $('modeManual').classList.toggle('active', mode==='manual');
+  $('modeEar').classList.toggle('active', mode==='earpiece');
+  if (mode === 'earpiece') {
+    speakingRing.classList.add('show');
+    panelsWrap.style.display = 'none';
+    modeTip.innerHTML = '<span>Earpiece mode:</span> translation spoken automatically in your ear 🎧';
+    speakBtn.style.display = 'none';
+  } else {
+    speakingRing.classList.remove('show');
+    panelsWrap.style.display = 'grid';
+    modeTip.innerHTML = '<span>Screen mode:</span> tap 🔊 to read translation aloud';
+    speakBtn.style.display = 'flex';
+  }
+}
 
 function setStatus(state, text) { statusPill.className='status-pill '+state; statusText.textContent=text; }
 function showError(msg) { errorMsg.textContent=msg; errorMsg.style.display='block'; setTimeout(()=>{errorMsg.style.display='none';},5000); }
 function showToast(msg) { toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2000); }
+
+function speakText(text, langCode) {
+  if (!window.speechSynthesis) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = TTS_CODES[langCode] || 'en-US';
+  u.rate = 0.92;
+  u.pitch = 1;
+  isSpeaking = true;
+
+  if (currentMode === 'earpiece') {
+    setStatus('speaking', 'speaking…');
+    speakingLabel.textContent = 'Speaking translation…';
+    translatedPanel.classList.add('speaking-now');
+  }
+
+  u.onend = () => {
+    isSpeaking = false;
+    if (currentMode === 'earpiece') {
+      speakingLabel.textContent = 'Listening for speech…';
+      translatedPanel.classList.remove('speaking-now');
+    }
+    if (isListening) setStatus('listening','listening…');
+    else setStatus('','ready');
+  };
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
 
 async function translate(text) {
   if (!text.trim() || text === lastTranslated) return;
@@ -211,7 +326,11 @@ async function translate(text) {
       lastTranslated = text;
       translatedText.textContent = result;
       translatedText.classList.remove('empty');
-      speakBtn.classList.add('ready');
+
+      // Auto-speak in earpiece mode
+      if (currentMode === 'earpiece') {
+        speakText(result, tgtCode);
+      }
     } else {
       showError('Translation failed. Try again.');
     }
@@ -219,8 +338,10 @@ async function translate(text) {
     showError('Network error. Check your connection.');
   } finally {
     spinner.style.display='none';
-    if (isListening) setStatus('listening','listening…');
-    else setStatus('','ready');
+    if (!isSpeaking) {
+      if (isListening) setStatus('listening','listening…');
+      else setStatus('','ready');
+    }
   }
 }
 
@@ -239,22 +360,23 @@ function startListening() {
   recognition.onstart = () => {
     isListening=true; micBtn.classList.add('on'); micLabel.textContent='Listening…';
     setStatus('listening','listening…'); visualizer.classList.add('active'); heardPanel.classList.add('active');
+    if (currentMode==='earpiece') speakingLabel.textContent='Listening for speech…';
   };
 
   recognition.onresult = (e) => {
-    let interim='', newFinal='';
-    for (let i=e.resultIndex; i<e.results.length; i++) {
-      const t=e.results[i][0].transcript;
-      if (e.results[i].isFinal) newFinal+=t; else interim+=t;
+    let allFinal = '', interim = '';
+    for (let i = 0; i < e.results.length; i++) {
+      if (e.results[i].isFinal) allFinal += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
     }
-    if (newFinal) {
-      finalText += (finalText?' ':'')+newFinal.trim();
-      heardText.innerHTML = finalText;
+    finalText = allFinal.trim();
+    if (finalText) {
+      heardText.innerHTML = finalText + (interim ? ' <span class="interim">' + interim + '</span>' : '');
       heardText.classList.remove('empty');
       clearTimeout(translateTimeout);
-      translateTimeout = setTimeout(()=>translate(finalText), 900);
+      translateTimeout = setTimeout(() => translate(finalText), 900);
     } else if (interim) {
-      heardText.innerHTML = (finalText?finalText+' ':'')+`<span class="interim">${interim}</span>`;
+      heardText.innerHTML = '<span class="interim">' + interim + '</span>';
       heardText.classList.remove('empty');
     }
   };
@@ -274,22 +396,19 @@ function stopListening() {
   if (recognition) { recognition.onend=null; recognition.stop(); }
   micBtn.classList.remove('on'); micLabel.textContent='Start Listening';
   setStatus('','ready'); visualizer.classList.remove('active'); heardPanel.classList.remove('active');
+  if (currentMode==='earpiece') speakingLabel.textContent='Tap Start Listening';
 }
 
 micBtn.addEventListener('click', ()=>{ if(isListening) stopListening(); else startListening(); });
 
 speakBtn.addEventListener('click', ()=>{
-  if (!currentTranslation) return;
-  const u = new SpeechSynthesisUtterance(currentTranslation);
-  u.lang = TTS_CODES[targetLang.value] || 'en-US';
-  u.rate = 0.95;
-  if (window.speechSynthesis) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); }
+  if (currentTranslation) speakText(currentTranslation, targetLang.value);
 });
 
 clearBtn.addEventListener('click', ()=>{
   heardText.textContent='Start speaking to begin…'; heardText.classList.add('empty');
   translatedText.textContent='Translation will appear here…'; translatedText.classList.add('empty');
-  currentTranslation=''; lastTranslated=''; speakBtn.classList.remove('ready');
+  currentTranslation=''; lastTranslated='';
   translatedPanel.className='panel';
   if (window.speechSynthesis) window.speechSynthesis.cancel();
 });
@@ -298,21 +417,18 @@ copyOrig.addEventListener('click', ()=>{ if (!heardText.classList.contains('empt
 copyTrans.addEventListener('click', ()=>{ if (currentTranslation) navigator.clipboard.writeText(currentTranslation).then(()=>showToast('Copied!')); });
 
 swapBtn.addEventListener('click', ()=>{
-  const wasListening = isListening;
+  const wasListening=isListening;
   if (wasListening) stopListening();
-  const oldSrc = sourceLang.value;
+  const oldSrcCode = SRC_CODES[sourceLang.value];
   const oldTgt = targetLang.value;
-  const oldSrcCode = SRC_CODES[oldSrc];
-  // Find matching source for old target
   for (let i=0; i<sourceLang.options.length; i++) {
-    if (SRC_CODES[sourceLang.options[i].value] === oldTgt) { sourceLang.selectedIndex=i; break; }
+    if (SRC_CODES[sourceLang.options[i].value]===oldTgt) { sourceLang.selectedIndex=i; break; }
   }
-  // Find matching target for old source
   for (let i=0; i<targetLang.options.length; i++) {
-    if (targetLang.options[i].value === oldSrcCode) { targetLang.selectedIndex=i; break; }
+    if (targetLang.options[i].value===oldSrcCode) { targetLang.selectedIndex=i; break; }
   }
   lastTranslated='';
-  if (wasListening) setTimeout(startListening, 300);
+  if (wasListening) setTimeout(startListening,300);
 });
 
 sourceLang.addEventListener('change', ()=>{ if(isListening){stopListening();setTimeout(startListening,300);} lastTranslated=''; });
